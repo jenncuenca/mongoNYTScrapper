@@ -75,7 +75,7 @@ app.get("/scrape", function(req, res) {
       });
   });
   
-  // ROUTE FOR SPECIFIC ARTICLE IDS - POPULATE WITH NOTE
+  // ROUTE FOR SPECIFIC ARTICLE IDS - POPULATE WITH COMMENT
   app.get("/articles/:id", function(req, res) {
     db.Article.findOne({ _id: req.params.id })
       .populate("comment")
@@ -89,12 +89,12 @@ app.get("/scrape", function(req, res) {
       });
   });
   
-  // ROUTE FOR SAVING/UPDATING ARITLCE'S NOTE
+  // ROUTE FOR SAVING/UPDATING ARITLCE'S COMMENTS
   app.post("/articles/:id", function(req, res) {
-    // CREATE NEW NOTE
+    // CREATE NEW COMMENT
     db.Comment.create(req.body)
       .then(function(dbComment) {
-        //IF NEW NOTE SUCCESSFULLY CREATED - FIND ARTICLE WITH ID EQUAL TO REQURED PARAMETERS THEN UPDATE THE ARTICLE ASSOCIATED WITH NEW NOTE.
+        //IF NEW COMMENT SUCCESSFULLY CREATED - FIND ARTICLE WITH ID EQUAL TO REQURED PARAMETERS THEN UPDATE THE ARTICLE ASSOCIATED WITH NEW COMMENT.
         return db.Article.findOneAndUpdate({ _id: req.params.id }, { comment: dbComment._id }, { new: true });
       })
       .then(function(dbArticle) {

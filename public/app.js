@@ -57,15 +57,14 @@ $.getJSON("/articles", function(info) {
         body: $("#commentinput").val()
       }
     })
-      // With that done
       .then(function(info) {
-        // Log the response
+        // LOG RESPONSE
         console.log(info);
-        // Empty the notes section
+        // EMPTY COMMENTS
         $("#comments").empty();
       });
   
-    // Also, remove the values entered in the input and textarea for note entry
+    // REMOVE VALUES ENTERED
     $("#titleinput").val("");
     $("#commentinput").val("");
   });
