@@ -1,21 +1,21 @@
-// DEPENDENCIES
+// == REQUIRE == //
 var mongoose = require("mongoose");
-
-// SAVE REF TO SCHEMA CONSTRUCTOR
+// Create schema class
 var Schema = mongoose.Schema;
 
-//USING SCHEMA CONSTRUCTOR - CREATE NEW SCHEMA OBJECT
+// Create the Note schema
 var commentSchema = new Schema({
-  title: {
-    type: String,
-    index:true
-  },
-
-  body: String
+  // Just a string
+  body: {
+    type: String
+  }
 });
 
-// CREATES MODEL FROM ABOVE SCHEMA USING MONGOOSE MODEL METHOD
-var Comment = mongoose.model("Comment", commentSchema);
+// Remember, Mongoose will automatically save the ObjectIds of the notes
+// These ids are referred to in the Article model
 
-// Export the Comment model
-module.exports = Comment;
+// Create the Note model with the NoteSchema
+var comment = mongoose.model("Comment", commentSchema);
+
+// Export the Note model
+module.exports = comment;

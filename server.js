@@ -1,114 +1,66 @@
-// DEPENDENCIES
+// === DEPENDENCIES === //
 var express = require("express");
 var bodyParser = require("body-parser");
-var logger = require("morgan");
 var mongoose = require("mongoose");
+var exphbs = require("express-handlebars");
 
-// SCRAPING TOOLS
-var axios = require("axios");
-var cheerio = require("cheerio");
 
-//REQUIRED MODELS
-var db = require("./models");
-var PORT = 3000;
+// === REQUIRED MODELS ===//
+var Comment = require("./models/comment.js");
+var Article = require("./models/article.js");
 
-// EXPRESS INITIALIZATION
+// MONGOOSE ES6 PROMISE HANDLING
+mongoose.Promise = Promise;
+
+//=== INITIALIZE EXPRESS APP ===//
 var app = express();
 
-//MORGAN LOGGER
-app.use(logger("dev"));
+app.use(bodyParser.urlencoded({
+   extended: false
+}));
 
-//BODY-PARSER FOR HANDLING FORM SUBMISSIONS
-app.use(bodyParser.urlencoded({ extended: true }));
+// STATIC PUBLIC DIRECTORY
+app.use(express.static(process.cwd() + "/public"));
 
-//EXPRESS.STATIC FOR PUBLIC FOLDER AS STATIC DIRECTORY
-app.use(express.static("public"));
+// === MONGO DATABASE CONFIGURATION USING MONGOOSE ===//
 
-//CONNECT TO MONGO DB
-mongoose.connect("mongodb://localhost/mongoNYT");
+var databaseUri = "mongodb://localhost/mongoosearticles";
 
-//ROUTES
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI);
+} else {
+  mongoose.connect(databaseUri);
+}
 
-//GET FOR NYT WEBSITE
-app.get("/scrape", function(req, res) {
-    axios.get("http://www.nytimes.com/").then(function(response) {
-      var $ = cheerio.load(response.data);
+var db = mongoose.connection;
 
-      $("h1").each(function(i, element) {
-        // SAVE EMPTY RESULT FROM GET REQUEST ABOVE
-        var result = {};
-  
-        result.title = $(this)
-          .children("a")
-          .text();
-        result.link = $(this)
-          .children("a")
-          .attr("href");
-  
-    
-        db.Article.create(result)
-          .then(function(dbArticle) {
-         
-            console.log(dbArticle);
-          })
-          .catch(function(err) {
-            // SEND ANY ERRORS TO CLIENT
-            return res.json(err);
-          });
-      });
-  
-      // SEND MESSAGE TO CLIENT IF ABLE TO SUCCESSFUL SCRAPE AND SAVE ARTICLE
-      res.send("Scraping Complete");
-    });
-  });
-  
-  // GET ALL ARTICLES FROM DB
-  app.get("/articles", function(req, res) {
-    db.Article.find({})
-      .then(function(dbArticle) {
-        // SEND ARTICLES BACK TO CLIENT IF SUCCESSFUL
-        res.json(dbArticle);
-      })
-      .catch(function(err) {
-        // SEND ANY ERRORS TO CLIENT
-        res.json(err);
-      });
-  });
-  
-  // ROUTE FOR SPECIFIC ARTICLE IDS - POPULATE WITH COMMENT
-  app.get("/articles/:id", function(req, res) {
-    db.Article.findOne({ _id: req.params.id })
-      .populate("comment")
-      .then(function(dbArticle) {
-        // IF SUCCESSFUL - SEND ARTICLE BACK TO CLIENT WITH ID
-        res.json(dbArticle);
-      })
-      .catch(function(err) {
-        // 
-        res.json(err);
-      });
-  });
-  
-  // ROUTE FOR SAVING/UPDATING ARITLCE'S COMMENTS
-  app.post("/articles/:id", function(req, res) {
-    // CREATE NEW COMMENT
-    db.Comment.create(req.body)
-      .then(function(dbComment) {
-        //IF NEW COMMENT SUCCESSFULLY CREATED - FIND ARTICLE WITH ID EQUAL TO REQURED PARAMETERS THEN UPDATE THE ARTICLE ASSOCIATED WITH NEW COMMENT.
-        return db.Article.findOneAndUpdate({ _id: req.params.id }, { comment: dbComment._id }, { new: true });
-      })
-      .then(function(dbArticle) {
-        // IF ARTICLE UPDATE SUCCESSFUL - SEND BACK TO CLIENT
-        res.json(dbArticle);
-      })
-      .catch(function(err) {
-        // SEND ANY ERRORS TO CLIENT
-        res.json(err);
-      });
-  });
-  
-  // START SERVER
-  app.listen(PORT, function() {
-    console.log("App running on port " + PORT + "!");
-  });
-  
+db.on("error", function(error) {
+  console.log("Mongoose Error: ", error);
+});
+
+db.once("open", function() {
+  console.log("Mongoose connection sucessful.");
+});
+
+// === HANDLEBARS SET UP === //
+
+// ENGINE VIEW AND DEFAULT
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
+
+// ROUTE IMPORTS & SERVER ACCESS
+var router = express.Router();
+
+// Require routes file pass router object
+require("./config/routes")(router);
+
+// ROUTER MIDDLEWARE REQUEST HANDLING
+app.use(router);
+
+//SET SERVER PORT
+var port = process.env.PORT || 3000;
+
+//SET LISTENER
+app.listen(port, function() {
+  console.log("// APP IS RUNNING ON PORT: " + port + "...");
+});

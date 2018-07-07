@@ -1,31 +1,36 @@
-//DEPENDENCIES
+// == REQUIRE == //
 var mongoose = require("mongoose");
-
-// SAVE REF TO SCHEMA CONSTRUCTOR
+// Create Schema class
 var Schema = mongoose.Schema;
 
-//USING SCHEMA CONSTRUCTOR - CREATE NEW SCHEMA OBJECT
+// Create article schema
 var articleSchema = new Schema({
-
+  
+  // title - string
   title: {
     type: String,
     required: true,
-    index: true
+    unique: true
   },
-
+  // link - string
   link: {
     type: String,
     required: true
   },
-
-  comment: {
+  date: String,
+  saved: {
+    type: Boolean,
+    default: false
+  },
+  // This only saves one comments's ObjectId
+  comment: [{
     type: Schema.Types.ObjectId,
     ref: "Comment"
-  }
+  }]
 });
 
-// CREATES MODEL FROM ABOVE SCHEMA USING MONGOOSE MODEL METHOD
+// Create the Article model with the ArticleSchema
 var Article = mongoose.model("Article", articleSchema);
 
-// EXPORT ARTICLE MODEL
+// Export the model
 module.exports = Article;
