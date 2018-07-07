@@ -3,9 +3,9 @@ var scrape = require("../scripts/scrape");
 var Article = require("../models/article");
 
 module.exports = {
-  fetch: function(callback) {
+  fetch: function (callback) {
 
-    scrape(function(data) {
+    scrape(function (data) {
 
       var articleData = data;
       // Save article object with a date
@@ -18,31 +18,41 @@ module.exports = {
       console.log("ARTICLE DATA: " + articleData)
 
       //filters duplicate articles
-        Article.collection.insertMany(articleData, { ordered: false }, function(err, docs) {
-          callback(err, docs);
-        });
+      Article.collection.insertMany(articleData, {
+        ordered: false
+      }, function (err, docs) {
+        callback(err, docs);
+      });
     });
   },
-  get: function(query, callback) {
+  get: function (query, callback) {
     //query is currently hardcoded to {saved: true}
     Article.find(query)
       .sort({
         _id: -1
       })
-      .exec(function(err, doc) {
+      .exec(function (err, doc) {
         //send saved articles back to routes to be rendered
         callback(doc);
       });
   },
-  update: function(query, callback) {
+  update: function (query, callback) {
     // saves or unsaves an article depending on the user query
-    Article.update({ _id: query.id }, {
-      $set: {saved: query.saved}
+    Article.update({
+      _id: query.id
+    }, {
+      $set: {
+        saved: query.saved
+      }
     }, {}, callback);
   },
-  addNote: function(query, callback) {
-    Article.findOneAndUpdate({_id: query.id }, {
-      $push: {comment: query.note}
+  addNote: function (query, callback) {
+    Article.findOneAndUpdate({
+      _id: query.id
+    }, {
+      $push: {
+        comment: query.note
+      }
     }, {}, callback);
   }
 };

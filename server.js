@@ -16,7 +16,7 @@ mongoose.Promise = Promise;
 var app = express();
 
 app.use(bodyParser.urlencoded({
-   extended: false
+  extended: false
 }));
 
 // STATIC PUBLIC DIRECTORY
@@ -34,18 +34,20 @@ if (process.env.MONGODB_URI) {
 
 var db = mongoose.connection;
 
-db.on("error", function(error) {
+db.on("error", function (error) {
   console.log("Mongoose Error: ", error);
 });
 
-db.once("open", function() {
+db.once("open", function () {
   console.log("Mongoose connection sucessful.");
 });
 
 // === HANDLEBARS SET UP === //
 
 // ENGINE VIEW AND DEFAULT
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.engine("handlebars", exphbs({
+  defaultLayout: "main"
+}));
 app.set("view engine", "handlebars");
 
 // ROUTE IMPORTS & SERVER ACCESS
@@ -61,6 +63,6 @@ app.use(router);
 var port = process.env.PORT || 3000;
 
 //SET LISTENER
-app.listen(port, function() {
+app.listen(port, function () {
   console.log("// APP IS RUNNING ON PORT: " + port + "...");
 });

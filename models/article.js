@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 
 // Create article schema
 var articleSchema = new Schema({
-  
+
   // title - string
   title: {
     type: String,
